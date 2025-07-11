@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import './App.css'
-import ShapeIcon, { getShapeCount } from './components/ShapeIcon'
+import ShapeIcon from './components/ShapeIcon'
 import type { ShapeType } from './components/ShapeIcon'
-import ObjectSplit, { getObjectCount } from './components/ObjectSplit'
+import ObjectSplit from './components/ObjectSplit'
 import type { ObjectCategoryEnum } from './components/ObjectSplit'
+import { getShapeCount, getObjectCount } from './utils/helpers'
 
 type TabType = 'shapes' | 'objects';
 
@@ -91,7 +92,9 @@ function App() {
       fontFamily: 'system-ui',
       backgroundColor: bgColor,
       color: textColor,
-      minHeight: '100vh'
+      minHeight: '100vh',
+      width: '100%',
+      boxSizing: 'border-box'
     }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
         <h1>Fraction Visuals</h1>
@@ -358,13 +361,13 @@ function App() {
             <div style={{ 
               marginTop: '15px', 
               padding: '10px', 
-              backgroundColor: '#e8e8e8', 
+              backgroundColor: isDarkMode ? '#3a3a3a' : '#e8e8e8', 
               borderRadius: '8px',
               fontSize: '12px',
-              color: '#333',
-              border: '1px solid #ccc'
+              color: isDarkMode ? '#fff' : '#333',
+              border: `1px solid ${borderColor}`
             }}>
-              <strong style={{ color: '#333' }}>Available objects:</strong> {getMaxObjectNum()}
+              <strong style={{ color: isDarkMode ? '#fff' : '#333' }}>Available objects:</strong> {getMaxObjectNum()}
             </div>
           </div>
 

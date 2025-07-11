@@ -102,21 +102,4 @@ const ShapeIcon: React.FC<ShapeIconProps> = ({
   );
 };
 
-// Helper function to get available image count for a shape/split/fraction combination
-export const getShapeCount = (
-  shapeName: ShapeType,
-  totalParts: number,
-  isEqualSplit: boolean
-): number => {
-  const splitType = isEqualSplit ? "equal" : "not_equal";
-  const fractionPath = `1:${totalParts}`;
-  const basePath = `/src/assets/shapes/${shapeName}/${splitType}/${fractionPath}/`;
-
-  const matchingPaths = Object.keys(svgModules).filter(
-    (path) => path.startsWith(basePath) && path.endsWith(".svg")
-  );
-
-  return matchingPaths.length;
-};
-
 export default ShapeIcon;
