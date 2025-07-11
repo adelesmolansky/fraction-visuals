@@ -17,15 +17,9 @@ interface ShapeIconProps {
   color?: GameColors;
 }
 
-// Import both SVG and PNG files
-const imageModules = import.meta.glob("/src/assets/shapes/**/*.{svg,png}", {
+// Import SVG files as raw content
+const svgModules = import.meta.glob("/src/assets/shapes/**/*.svg", {
   as: "raw",
-  eager: false,
-});
-
-// Import PNG files as URLs
-const pngModules = import.meta.glob("/src/assets/shapes/**/*.png", {
-  as: "url",
   eager: false,
 });
 
@@ -39,7 +33,6 @@ const ShapeIcon: React.FC<ShapeIconProps> = ({
   const [content, setContent] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  const [isPng, setIsPng] = useState(false);
 
   const splitType = isEqualSplit ? "equal" : "not_equal";
   const fractionPath = `1:${totalParts}`;
@@ -48,11 +41,9 @@ const ShapeIcon: React.FC<ShapeIconProps> = ({
   const getImagePath = () => {
     const basePath = `/src/assets/shapes/${shapeName}/${splitType}/${fractionPath}/`;
 
-    // Find all images in this directory
-    const matchingPaths = Object.keys(imageModules).filter(
-      (path) =>
-        path.startsWith(basePath) &&
-        (path.endsWith(".svg") || path.endsWith(".png"))
+    // Find all SVG files in this directory
+    const matchingPaths = Object.keys(svgModules).filter(
+      (path) => path.startsWith(basePath) && path.endsWith(".svg")
     );
 
     // Sort paths to ensure consistent ordering
@@ -82,28 +73,15 @@ const ShapeIcon: React.FC<ShapeIconProps> = ({
         return;
       }
 
-      const isPngFile = imagePath.endsWith(".png");
-      setIsPng(isPngFile);
-
       try {
-        if (isPngFile) {
-          // For PNG files, load as URL
-          const loader = pngModules[imagePath];
-          if (!loader) {
-            throw new Error(`PNG loader not found: ${imagePath}`);
-          }
-          const url = (await loader()) as string;
-          setContent(url);
-        } else {
-          // For SVG files, load as raw content
-          const loader = imageModules[imagePath];
-          if (!loader) {
-            throw new Error(`SVG loader not found: ${imagePath}`);
-          }
-          const rawSvg = (await loader()) as string;
-          const coloredSvg = rawSvg.replace(/fill="[^"]*"/g, `fill="${color}"`);
-          setContent(coloredSvg);
+        // Load SVG as raw content
+        const loader = svgModules[imagePath];
+        if (!loader) {
+          throw new Error(`SVG loader not found: ${imagePath}`);
         }
+        const rawSvg = (await loader()) as string;
+        const coloredSvg = rawSvg.replace(/fill="[^"]*"/g, `fill="${color}"`);
+        setContent(coloredSvg);
       } catch (err) {
         console.error("Error loading image:", err);
         setError(true);
@@ -118,18 +96,6 @@ const ShapeIcon: React.FC<ShapeIconProps> = ({
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Image not found</div>;
   if (!content) return null;
-
-  if (isPng) {
-    return (
-      <div className="shape-icon">
-        <img
-          src={content}
-          alt={`${shapeName} ${splitType} ${fractionPath} ${shapeNum}`}
-          style={{ maxWidth: "100%", height: "auto" }}
-        />
-      </div>
-    );
-  }
 
   return (
     <div className="shape-icon" dangerouslySetInnerHTML={{ __html: content }} />
@@ -146,10 +112,8 @@ export const getShapeCount = (
   const fractionPath = `1:${totalParts}`;
   const basePath = `/src/assets/shapes/${shapeName}/${splitType}/${fractionPath}/`;
 
-  const matchingPaths = Object.keys(imageModules).filter(
-    (path) =>
-      path.startsWith(basePath) &&
-      (path.endsWith(".svg") || path.endsWith(".png"))
+  const matchingPaths = Object.keys(svgModules).filter(
+    (path) => path.startsWith(basePath) && path.endsWith(".svg")
   );
 
   return matchingPaths.length;
