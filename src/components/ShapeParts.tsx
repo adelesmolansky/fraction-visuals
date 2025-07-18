@@ -15,6 +15,7 @@ export interface ShapePartsProps {
   totalParts: number; // denominators: halves, thirds, quarters
   partsShaded: number; // numerator
   color?: GameColors;
+  isDarkMode?: boolean;
 }
 
 // Import SVG files as raw content
@@ -29,6 +30,7 @@ const ShapeParts: React.FC<ShapePartsProps> = ({
   totalParts,
   partsShaded,
   color = "#5FAC4B",
+  isDarkMode = false,
 }) => {
   const [svgContents, setSvgContents] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
@@ -70,12 +72,21 @@ const ShapeParts: React.FC<ShapePartsProps> = ({
                 return "";
               }
               
-              // Replace the fill color in the SVG - handle both single and double quotes
-              // Only replace hex colors, not "none" or "black" (for outlines)
-              content = content.replace(/fill=["']#[0-9A-Fa-f]{6}["']/gi, `fill="${color}"`);
+              // 1. First, handle dark mode transformations for static "black" colors
+              if (isDarkMode) {
+                // Replace fill="black" with fill="white" for outlines
+                const blackFillRegex = /(fill\s*=\s*)(["'])black\2/gi;
+                content = content.replace(blackFillRegex, '$1$2white$2');
+                
+                // Replace stroke="black" with stroke="white" for strokes
+                const blackStrokeRegex = /(stroke\s*=\s*)(["'])black\2/gi;
+                content = content.replace(blackStrokeRegex, '$1$2white$2');
+              }
               
-              // Also handle fill with spaces around equals sign
-              content = content.replace(/fill\s*=\s*["']#[0-9A-Fa-f]{6}["']/gi, `fill="${color}"`);
+              // 2. Second, apply the user-selected fill color to the main shape
+              // This handles both 3-digit and 6-digit hex codes with improved regex
+              const hexFillRegex = /fill\s*=\s*["']#(?:[0-9a-f]{3}){1,2}["']/gi;
+              content = content.replace(hexFillRegex, `fill="${color}"`);
               
               // Normalize SVG size by removing width/height and keeping only viewBox
               // This allows CSS to control the size uniformly
@@ -108,7 +119,7 @@ const ShapeParts: React.FC<ShapePartsProps> = ({
     };
 
     loadSVGs();
-  }, [shapeName, totalParts, partsShaded, color]);
+  }, [shapeName, totalParts, partsShaded, color, isDarkMode]);
 
   if (loading) {
     return (

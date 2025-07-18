@@ -124,6 +124,7 @@ const ShapePartsTab: React.FC<ShapePartsTabProps> = ({ isDarkMode }) => {
             totalParts={shapePartTotal}
             partsShaded={shapePartShaded}
             color={shapePartColor}
+            isDarkMode={isDarkMode}
           />
         </div>
       </div>
