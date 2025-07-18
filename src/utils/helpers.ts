@@ -12,6 +12,11 @@ const svgModules = import.meta.glob("/src/assets/shapes_splits/**/*.svg", {
   eager: false,
 });
 
+const shapePartModules = import.meta.glob("/src/assets/shape_parts/**/*.svg", {
+  as: "raw",
+  eager: false,
+});
+
 // Helper function to get available object count for a category
 export const getObjectCount = (category: ObjectCategoryEnum): number => {
   const basePath = `/src/assets/fraction_objects/${category}/`;
@@ -38,4 +43,53 @@ export const getShapeCount = (
   );
 
   return matchingPaths.length;
+};
+
+// Helper function to get available shape parts count for a shape/fraction combination
+export const getShapePartsCount = (
+  shapeName: string,
+  numerator: number,
+  denominator: number
+): number => {
+  const fractionPath = `${numerator}:${denominator}`;
+  const basePath = `/src/assets/shape_parts/${shapeName}/${fractionPath}/`;
+  
+  const matchingPaths = Object.keys(shapePartModules).filter(
+    (path) => path.startsWith(basePath) && path.endsWith(".svg")
+  );
+  
+  return matchingPaths.length;
+};
+
+// Helper function to get available fractions for a shape
+export const getAvailableFractions = (shapeName: string): Array<{numerator: number, denominator: number}> => {
+  const basePath = `/src/assets/shape_parts/${shapeName}/`;
+  
+  // Get all paths that start with the shape name
+  const matchingPaths = Object.keys(shapePartModules).filter(
+    (path) => path.startsWith(basePath) && path.endsWith(".svg")
+  );
+  
+  // Extract unique fractions
+  const fractionSet = new Set<string>();
+  matchingPaths.forEach((path) => {
+    const match = path.match(/\/(\d+):(\d+)\//);
+    if (match) {
+      fractionSet.add(`${match[1]}:${match[2]}`);
+    }
+  });
+  
+  // Convert to array of objects and sort
+  return Array.from(fractionSet)
+    .map(fraction => {
+      const [num, den] = fraction.split(':').map(Number);
+      return { numerator: num, denominator: den };
+    })
+    .sort((a, b) => {
+      // Sort by denominator first, then numerator
+      if (a.denominator !== b.denominator) {
+        return a.denominator - b.denominator;
+      }
+      return a.numerator - b.numerator;
+    });
 };
