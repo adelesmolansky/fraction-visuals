@@ -14,6 +14,7 @@ An interactive React application for visualizing fractions using various geometr
 ## Demo
 
 The application provides an interactive editor where you can:
+
 - Select different shapes from a dropdown
 - Choose fraction denominators (2, 3, 4, or 5 depending on the shape)
 - Toggle between equal and unequal splits
@@ -24,23 +25,26 @@ The application provides an interactive editor where you can:
 
 ### Prerequisites
 
-- Node.js 20+ 
+- Node.js 20+
 - pnpm (or npm/yarn)
 
 ### Installation
 
 1. Clone the repository:
+
 ```bash
 git clone https://github.com/[your-username]/fraction-visuals.git
 cd fraction-visuals
 ```
 
 2. Install dependencies:
+
 ```bash
 pnpm install
 ```
 
 3. Start the development server:
+
 ```bash
 pnpm dev
 ```
@@ -73,15 +77,15 @@ src/
 ### Using the ShapeIcon Component
 
 ```tsx
-import ShapeIcon from './components/ShapeIcon';
+import ShapeIcon from "./components/ShapeIcon";
 
 <ShapeIcon
-  shapeName="rectangle"  // Shape type
-  totalParts={2}        // Denominator (2, 3, 4, or 5)
-  shapeNum={1}          // Which variation to show
-  isEqualSplit={true}   // Equal or unequal divisions
-  color="#5FAC4B"       // Fill color for SVGs
-/>
+  shapeName="rectangle" // Shape type
+  totalParts={2} // Denominator (2, 3, 4, or 5)
+  shapeNum={1} // Which variation to show
+  isEqualSplit={true} // Equal or unequal divisions
+  color="#5FAC4B" // Fill color for SVGs
+/>;
 ```
 
 ### Available Props
@@ -115,7 +119,7 @@ The component automatically detects available shapes and handles missing combina
 
 ### Adding New Shapes
 
-1. Add shape assets to `src/assets/shapes/[shape-name]/`
+1. Add shape assets to `src/assets/shapes_splits/[shape-name]/`
 2. Organize by split type: `equal/` and `not_equal/`
 3. Create fraction folders: `1:2/`, `1:3/`, etc.
 4. Add numbered SVG/PNG files: `1.svg`, `2.svg`, etc.

@@ -18,7 +18,7 @@ interface ShapeIconProps {
 }
 
 // Import SVG files as raw content
-const svgModules = import.meta.glob("/src/assets/shapes/**/*.svg", {
+const svgModules = import.meta.glob("/src/assets/shapes_splits/**/*.svg", {
   as: "raw",
   eager: false,
 });
@@ -39,7 +39,7 @@ const ShapeIcon: React.FC<ShapeIconProps> = ({
 
   // Get all possible image paths for this shape/split/fraction combination
   const getImagePath = () => {
-    const basePath = `/src/assets/shapes/${shapeName}/${splitType}/${fractionPath}/`;
+    const basePath = `/src/assets/shapes_splits/${shapeName}/${splitType}/${fractionPath}/`;
 
     // Find all SVG files in this directory
     const matchingPaths = Object.keys(svgModules).filter(

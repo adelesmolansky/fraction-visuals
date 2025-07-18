@@ -7,7 +7,7 @@ const objectImages = import.meta.glob("/src/assets/fraction_objects/**/*.png", {
   eager: false,
 });
 
-const svgModules = import.meta.glob("/src/assets/shapes/**/*.svg", {
+const svgModules = import.meta.glob("/src/assets/shapes_splits/**/*.svg", {
   as: "raw",
   eager: false,
 });
@@ -15,11 +15,11 @@ const svgModules = import.meta.glob("/src/assets/shapes/**/*.svg", {
 // Helper function to get available object count for a category
 export const getObjectCount = (category: ObjectCategoryEnum): number => {
   const basePath = `/src/assets/fraction_objects/${category}/`;
-  
+
   const matchingPaths = Object.keys(objectImages).filter(
     (path) => path.startsWith(basePath) && path.endsWith(".png")
   );
-  
+
   return matchingPaths.length;
 };
 
@@ -31,7 +31,7 @@ export const getShapeCount = (
 ): number => {
   const splitType = isEqualSplit ? "equal" : "not_equal";
   const fractionPath = `1:${totalParts}`;
-  const basePath = `/src/assets/shapes/${shapeName}/${splitType}/${fractionPath}/`;
+  const basePath = `/src/assets/shapes_splits/${shapeName}/${splitType}/${fractionPath}/`;
 
   const matchingPaths = Object.keys(svgModules).filter(
     (path) => path.startsWith(basePath) && path.endsWith(".svg")
