@@ -1,4 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
+import { useDynamicSVG } from "../hooks/useDynamicSVG";
+import SvgPart from "./SvgPart";
+import SvgErrorBoundary from "./SvgErrorBoundary";
 import type { GameColors } from "./ShapeIcon";
 
 export type ShapePartType = 
@@ -18,13 +21,6 @@ export interface ShapePartsProps {
   isDarkMode?: boolean;
 }
 
-// Import SVG files as raw content
-const svgModules = import.meta.glob("/src/assets/shape_parts/**/*.svg", {
-  query: '?raw',
-  import: 'default',
-  eager: false,
-});
-
 const ShapeParts: React.FC<ShapePartsProps> = ({
   shapeName,
   totalParts,
@@ -32,103 +28,20 @@ const ShapeParts: React.FC<ShapePartsProps> = ({
   color = "#5FAC4B",
   isDarkMode = false,
 }) => {
-  const [svgContents, setSvgContents] = useState<string[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
+  const { svgContents, isLoading, error } = useDynamicSVG(
+    shapeName,
+    partsShaded,
+    totalParts
+  );
 
-  useEffect(() => {
-    const loadSVGs = async () => {
-      try {
-        setLoading(true);
-        setError(false);
-        
-        const fractionPath = `${partsShaded}:${totalParts}`;
-        const basePath = `/src/assets/shape_parts/${shapeName}/${fractionPath}/`;
-        
-        // Find all SVG files in this directory
-        const matchingPaths = Object.keys(svgModules)
-          .filter(path => path.startsWith(basePath) && path.endsWith(".svg"))
-          .sort(); // Sort for consistent ordering
-        
-        if (matchingPaths.length === 0) {
-          setError(true);
-          setSvgContents([]);
-          return;
-        }
-        
-        // Load all SVGs for this fraction
-        const loadedSVGs = await Promise.all(
-          matchingPaths.map(async (path) => {
-            const loader = svgModules[path];
-            if (loader) {
-              const rawContent = await loader();
-              
-              // Cast to string since we know it's imported as raw
-              let content = rawContent as string;
-              
-              // Ensure content is actually a string
-              if (typeof content !== 'string') {
-                console.error('SVG content is not a string:', typeof content, content);
-                return "";
-              }
-              
-              // 1. First, handle dark mode transformations for static "black" colors
-              if (isDarkMode) {
-                // Replace fill="black" with fill="white" for outlines
-                const blackFillRegex = /(fill\s*=\s*)(["'])black\2/gi;
-                content = content.replace(blackFillRegex, '$1$2white$2');
-                
-                // Replace stroke="black" with stroke="white" for strokes
-                const blackStrokeRegex = /(stroke\s*=\s*)(["'])black\2/gi;
-                content = content.replace(blackStrokeRegex, '$1$2white$2');
-              }
-              
-              // 2. Second, apply the user-selected fill color to the main shape
-              // This handles both 3-digit and 6-digit hex codes with improved regex
-              const hexFillRegex = /fill\s*=\s*["']#(?:[0-9a-f]{3}){1,2}["']/gi;
-              content = content.replace(hexFillRegex, `fill="${color}"`);
-              
-              // Normalize SVG size by removing width/height and keeping only viewBox
-              // This allows CSS to control the size uniformly
-              content = content.replace(/width="[^"]*"/g, '');
-              content = content.replace(/height="[^"]*"/g, '');
-              
-              // Ensure viewBox is present for proper scaling
-              if (!content.includes('viewBox')) {
-                // If no viewBox, try to extract from width/height (shouldn't happen with these files)
-                const widthMatch = content.match(/width="(\d+)"/);
-                const heightMatch = content.match(/height="(\d+)"/);
-                if (widthMatch && heightMatch) {
-                  content = content.replace('<svg', `<svg viewBox="0 0 ${widthMatch[1]} ${heightMatch[1]}"`);
-                }
-              }
-              
-              return content;
-            }
-            return "";
-          })
-        );
-        
-        setSvgContents(loadedSVGs.filter(svg => svg !== ""));
-      } catch (err) {
-        console.error("Error loading SVGs:", err);
-        setError(true);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadSVGs();
-  }, [shapeName, totalParts, partsShaded, color, isDarkMode]);
-
-  if (loading) {
+  if (isLoading) {
     return (
       <div style={{ 
         display: 'flex', 
         justifyContent: 'center', 
         alignItems: 'center',
         minHeight: '200px',
-        color: '#666'
+        color: isDarkMode ? '#999' : '#666'
       }}>
         Loading shape parts...
       </div>
@@ -142,12 +55,19 @@ const ShapeParts: React.FC<ShapePartsProps> = ({
         justifyContent: 'center', 
         alignItems: 'center',
         minHeight: '200px',
-        color: '#666',
+        color: isDarkMode ? '#999' : '#666',
         textAlign: 'center'
       }}>
         <div>
-          <p>No shape parts available for:</p>
-          <p>{shapeName} - {partsShaded}/{totalParts}</p>
+          <p style={{ margin: '0 0 10px 0' }}>No shape parts available for:</p>
+          <p style={{ margin: 0, fontWeight: 'bold' }}>
+            {shapeName} - {partsShaded}/{totalParts}
+          </p>
+          {error && (
+            <p style={{ margin: '10px 0 0 0', fontSize: '0.9em', color: '#e74c3c' }}>
+              {error.message}
+            </p>
+          )}
         </div>
       </div>
     );
@@ -173,54 +93,42 @@ const ShapeParts: React.FC<ShapePartsProps> = ({
         alignItems: 'center',
         padding: '20px'
       }}>
-      {svgContents.map((svgContent, index) => {
-        // Add preserveAspectRatio to maintain shape proportions while fitting in container
-        let styledSvg = svgContent.replace(
-          '<svg',
-          '<svg preserveAspectRatio="xMidYMid meet" style="width: 100%; height: 100%; display: block; max-width: 100%; max-height: 100%;"'
-        );
-        
-        // Also ensure viewBox attribute exists (should already be there)
-        if (!styledSvg.includes('preserveAspectRatio')) {
-          styledSvg = styledSvg.replace(
-            'viewBox=',
-            'preserveAspectRatio="xMidYMid meet" viewBox='
-          );
-        }
-        
-        return (
-          <div
+        {svgContents.map((svgContent, index) => (
+          <SvgErrorBoundary
             key={index}
-            style={{
-              width: '150px',
-              height: '150px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              border: '1px solid #ddd',
-              borderRadius: '8px',
-              backgroundColor: '#fff',
-              padding: '15px',
-              position: 'relative',
-              boxSizing: 'border-box'
-            }}
-          >
-            <div
-              className="shape-part-container"
-              style={{
-                width: '120px',
-                height: '120px',
+            fallback={
+              <div style={{
+                width: '150px',
+                height: '150px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                position: 'relative'
-              }}
-              dangerouslySetInnerHTML={{ __html: styledSvg }}
+                border: `1px solid ${isDarkMode ? '#444' : '#ddd'}`,
+                borderRadius: '8px',
+                backgroundColor: isDarkMode ? '#1a1a1a' : '#fff',
+                color: isDarkMode ? '#999' : '#666',
+                padding: '15px'
+              }}>
+                <div style={{ textAlign: 'center' }}>
+                  <p style={{ margin: 0 }}>⚠️</p>
+                  <p style={{ margin: '5px 0 0 0', fontSize: '0.8em' }}>
+                    Display Error
+                  </p>
+                </div>
+              </div>
+            }
+          >
+            <SvgPart
+              rawSvg={svgContent}
+              color={color}
+              darkMode={isDarkMode}
+              title={`Part ${index + 1} of ${partsShaded}/${totalParts} ${shapeName}`}
+              description={`Visual representation of fraction ${partsShaded}/${totalParts} using a ${shapeName} shape`}
+              index={index}
             />
-          </div>
-        );
-      })}
-    </div>
+          </SvgErrorBoundary>
+        ))}
+      </div>
     </>
   );
 };
