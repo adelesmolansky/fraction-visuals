@@ -23,52 +23,119 @@ const ShapePartsTab: React.FC<ShapePartsTabProps> = ({ isDarkMode }) => {
       <div style={{ flex: 1 }}>
         <h2>Shape Parts Editor</h2>
         
-        <div style={{ marginBottom: '15px' }}>
-          <label style={{ display: 'block', marginBottom: '5px' }}>
+        <div style={{ marginBottom: '20px' }}>
+          <label style={{ display: 'block', marginBottom: '10px' }}>
             Shape:
           </label>
-          <select 
-            value={shapePartName} 
-            onChange={(e) => setShapePartName(e.target.value as ShapePartType)}
-            style={{ padding: '8px', width: '100%', backgroundColor: cardBgColor, color: textColor, border: `1px solid ${borderColor}` }}
-          >
-            <option value="circle">Circle</option>
-            <option value="diamond">Diamond</option>
-            <option value="hexagon">Hexagon</option>
-            <option value="rectangle">Rectangle</option>
-            <option value="rhombus">Rhombus</option>
-            <option value="square">Square</option>
-            <option value="triangle">Triangle</option>
-          </select>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+            {(['circle', 'diamond', 'hexagon', 'rectangle', 'rhombus', 'square', 'triangle'] as ShapePartType[]).map((shape) => {
+              const isSelected = shapePartName === shape;
+              const shapeEmoji = shape === 'circle' ? '○' :
+                                shape === 'diamond' ? '◇' :
+                                shape === 'hexagon' ? '⬡' :
+                                shape === 'rectangle' ? '▭' :
+                                shape === 'rhombus' ? '◊' :
+                                shape === 'square' ? '□' :
+                                shape === 'triangle' ? '△' : '';
+              
+              return (
+                <button
+                  key={shape}
+                  onClick={() => setShapePartName(shape)}
+                  style={{
+                    padding: '8px 16px',
+                    backgroundColor: isSelected 
+                      ? (isDarkMode ? '#4a4a4a' : '#e0e0e0')
+                      : cardBgColor,
+                    color: textColor,
+                    border: `2px solid ${isSelected ? shapePartColor : borderColor}`,
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    fontWeight: isSelected ? 'bold' : 'normal',
+                    minWidth: '100px',
+                    textTransform: 'capitalize'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isSelected) {
+                      e.currentTarget.style.backgroundColor = isDarkMode ? '#3a3a3a' : '#f0f0f0';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isSelected) {
+                      e.currentTarget.style.backgroundColor = cardBgColor;
+                    }
+                  }}
+                >
+                  <div style={{ fontSize: '20px', marginBottom: '2px' }}>
+                    {shapeEmoji}
+                  </div>
+                  <div style={{ fontSize: '14px' }}>
+                    {shape}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
         </div>
         
         <div style={{ marginBottom: '15px' }}>
-          <label style={{ display: 'block', marginBottom: '5px' }}>
+          <label style={{ display: 'block', marginBottom: '10px' }}>
             Fraction:
           </label>
-          <select 
-            value={`${shapePartShaded}:${shapePartTotal}`} 
-            onChange={(e) => {
-              const [num, den] = e.target.value.split(':').map(Number);
-              setShapePartShaded(num);
-              setShapePartTotal(den);
-            }}
-            style={{ padding: '8px', width: '100%', backgroundColor: cardBgColor, color: textColor, border: `1px solid ${borderColor}` }}
-          >
-            {getAvailableFractions(shapePartName).map(({ numerator, denominator }) => (
-              <option key={`${numerator}:${denominator}`} value={`${numerator}:${denominator}`}>
-                {numerator}/{denominator} - 
-                {numerator === 1 && denominator === 2 ? ' Half' :
-                 numerator === 1 && denominator === 3 ? ' One Third' :
-                 numerator === 2 && denominator === 3 ? ' Two Thirds' :
-                 numerator === 1 && denominator === 4 ? ' One Quarter' :
-                 numerator === 2 && denominator === 4 ? ' Half' :
-                 numerator === 3 && denominator === 4 ? ' Three Quarters' :
-                 numerator === denominator ? ' Whole' :
-                 ` ${numerator} out of ${denominator}`}
-              </option>
-            ))}
-          </select>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+            {getAvailableFractions(shapePartName).map(({ numerator, denominator }) => {
+              const isSelected = shapePartShaded === numerator && shapePartTotal === denominator;
+              const fractionLabel = numerator === 1 && denominator === 2 ? 'Half' :
+                                   numerator === 1 && denominator === 3 ? 'One Third' :
+                                   numerator === 2 && denominator === 3 ? 'Two Thirds' :
+                                   numerator === 1 && denominator === 4 ? 'One Quarter' :
+                                   numerator === 2 && denominator === 4 ? 'Half' :
+                                   numerator === 3 && denominator === 4 ? 'Three Quarters' :
+                                   numerator === denominator ? 'Whole' :
+                                   `${numerator} out of ${denominator}`;
+              
+              return (
+                <button
+                  key={`${numerator}:${denominator}`}
+                  onClick={() => {
+                    setShapePartShaded(numerator);
+                    setShapePartTotal(denominator);
+                  }}
+                  style={{
+                    padding: '8px 16px',
+                    backgroundColor: isSelected 
+                      ? (isDarkMode ? '#4a4a4a' : '#e0e0e0')
+                      : cardBgColor,
+                    color: textColor,
+                    border: `2px solid ${isSelected ? shapePartColor : borderColor}`,
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    fontWeight: isSelected ? 'bold' : 'normal',
+                    minWidth: '100px'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isSelected) {
+                      e.currentTarget.style.backgroundColor = isDarkMode ? '#3a3a3a' : '#f0f0f0';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isSelected) {
+                      e.currentTarget.style.backgroundColor = cardBgColor;
+                    }
+                  }}
+                >
+                  <div style={{ fontSize: '16px', marginBottom: '2px' }}>
+                    {numerator}/{denominator}
+                  </div>
+                  <div style={{ fontSize: '12px', opacity: 0.8 }}>
+                    {fractionLabel}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         <div style={{ marginBottom: '15px' }}>
