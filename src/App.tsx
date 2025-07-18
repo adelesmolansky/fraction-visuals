@@ -3,8 +3,9 @@ import './App.css'
 import ShapeVisualsTab from './components/tabs/ShapeVisualsTab'
 import ObjectSplitsTab from './components/tabs/ObjectSplitsTab'
 import ShapePartsTab from './components/tabs/ShapePartsTab'
+import ObjectPartsTab from './components/tabs/ObjectPartsTab'
 
-type TabType = 'shapes' | 'objects' | 'shapeParts';
+type TabType = 'shapes' | 'objects' | 'shapeParts' | 'objectParts';
 
 function App() {
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -80,6 +81,7 @@ function App() {
           onClick={() => setActiveTab('shapeParts')}
           style={{
             padding: '10px 20px',
+            marginRight: '10px',
             borderRadius: '8px 8px 0 0',
             border: `1px solid ${borderColor}`,
             borderBottom: activeTab === 'shapeParts' ? 'none' : `1px solid ${borderColor}`,
@@ -91,6 +93,21 @@ function App() {
         >
           Shape Parts
         </button>
+        <button
+          onClick={() => setActiveTab('objectParts')}
+          style={{
+            padding: '10px 20px',
+            borderRadius: '8px 8px 0 0',
+            border: `1px solid ${borderColor}`,
+            borderBottom: activeTab === 'objectParts' ? 'none' : `1px solid ${borderColor}`,
+            backgroundColor: activeTab === 'objectParts' ? cardBgColor : 'transparent',
+            color: textColor,
+            cursor: 'pointer',
+            fontWeight: activeTab === 'objectParts' ? 'bold' : 'normal'
+          }}
+        >
+          Object Parts
+        </button>
       </div>
       
       {activeTab === 'shapes' ? (
@@ -99,6 +116,8 @@ function App() {
         <ObjectSplitsTab isDarkMode={isDarkMode} />
       ) : activeTab === 'shapeParts' ? (
         <ShapePartsTab isDarkMode={isDarkMode} />
+      ) : activeTab === 'objectParts' ? (
+        <ObjectPartsTab isDarkMode={isDarkMode} />
       ) : null}
     </div>
   )

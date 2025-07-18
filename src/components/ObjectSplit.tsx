@@ -11,7 +11,8 @@ export interface ObjectSplitProps {
 
 // Import PNG files as URLs
 const objectImages = import.meta.glob("/src/assets/fraction_objects/**/*.png", {
-  as: "url",
+  query: '?url',
+  import: 'default',
   eager: false,
 });
 
@@ -46,7 +47,7 @@ const ObjectSplit: React.FC<ObjectSplitProps> = ({
       }
 
       try {
-        const url = (await loader()) as string;
+        const url = await loader() as string;
         setImageUrl(url);
       } catch (err) {
         console.error("Error loading image:", err);

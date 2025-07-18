@@ -19,7 +19,8 @@ interface ShapeIconProps {
 
 // Import SVG files as raw content
 const svgModules = import.meta.glob("/src/assets/shapes_splits/**/*.svg", {
-  as: "raw",
+  query: '?raw',
+  import: 'default',
   eager: false,
 });
 
@@ -79,7 +80,7 @@ const ShapeIcon: React.FC<ShapeIconProps> = ({
         if (!loader) {
           throw new Error(`SVG loader not found: ${imagePath}`);
         }
-        const rawSvg = (await loader()) as string;
+        const rawSvg = await loader() as string;
         const coloredSvg = rawSvg.replace(/fill="[^"]*"/g, `fill="${color}"`);
         setContent(coloredSvg);
       } catch (err) {

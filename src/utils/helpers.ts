@@ -3,17 +3,20 @@ import type { ShapeType } from "../components/ShapeIcon";
 
 // Import modules for helper functions
 const objectImages = import.meta.glob("/src/assets/fraction_objects/**/*.png", {
-  as: "url",
+  query: '?url',
+  import: 'default',
   eager: false,
 });
 
 const svgModules = import.meta.glob("/src/assets/shapes_splits/**/*.svg", {
-  as: "raw",
+  query: '?raw',
+  import: 'default',
   eager: false,
 });
 
 const shapePartModules = import.meta.glob("/src/assets/shape_parts/**/*.svg", {
-  as: "raw",
+  query: '?raw',
+  import: 'default',
   eager: false,
 });
 
